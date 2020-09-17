@@ -69,6 +69,4 @@ def encrypt(text, key):
         result.append(getChar(encChunk[1][0], keysAlphabetBase))
         i +=2
 
-    # print (encChunk)
-
     return ''.join(result)
