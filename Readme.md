@@ -39,7 +39,6 @@ encrypt('Hi','cats') → 'OR'
 encrypt('This is a good day','bbaa') → 'AAAAAAGACAGAYA'
 
 
-
 test.assert_equals(encrypt('','azyb'), '')
 test.assert_equals(encrypt('hello','hill'), 'DRJIMN')
 test.assert_equals(encrypt('This is a good day','bbaa'), 'AAAAAAGACAGAYA')
