@@ -1,75 +1,90 @@
-import numpy as np
+import re
 
-def getNumber(keyLetter):
-    keysAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+KEYS_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+KEY_BASE = len(KEYS_ALPHABET)
+KEY_LENGTH = 4
+PADDING_Z = "Z"
 
+############################################
+def getNumber(letter):
     i = 0
-    for k in keysAlphabet:
-        if k == keyLetter:
+    for k in KEYS_ALPHABET:
+        if k == letter:
             return i
         i += 1
-    raise Exception("Wrong key letter [", keyLetter, "]")
+    raise Exception("Wrong letter [", letter, "]")
 
-
+############################################
 def multipyMatrix(encMatrixWorker, keyMatrix, base):
     result = [[0 for j in range(1)] for i in range(2)]
     result[0][0] = (encMatrixWorker[0][0] * keyMatrix[0][0] + encMatrixWorker[1][0] * keyMatrix[0][1]) % base
     result[1][0] = (encMatrixWorker[0][0] * keyMatrix[1][0] + encMatrixWorker[1][0] * keyMatrix[1][1]) % base
     return result
 
-
+############################################
 def getChar(number, base):
     keysAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     if number > base:
         raise Exception("Wrong letter number [", number, "]")
     return keysAlphabet[number]
 
-
-def encrypt(text, key):
-    keysAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    keysAlphabetBase = len(keysAlphabet)
-
-    keyValidated = key.upper()
-    textValidated = text.upper()
-    lenText = len(text)
-    result = []
-
-    paddingZ = "Z"
-
-    encText = [0 for e in range(lenText)]
-    keyMatrix = [[0 for j in range(2)] for i in range(2)]
-    encMatrixWorker = [[0 for j in range(1)] for i in range(2)]
-
-    if len(keyValidated) != 4:
-        raise Exception("Wrong key length. Key must consist of 4 letters")
-
+############################################
+def fillKeyMatrix(keyMatrix, keyValidated):
     keyMatrix[0][0] = getNumber(keyValidated[0])
     keyMatrix[0][1] = getNumber(keyValidated[1])
     keyMatrix[1][0] = getNumber(keyValidated[2])
     keyMatrix[1][1] = getNumber(keyValidated[3])
+    return keyMatrix
 
-    print (keyMatrix)
+############################################
+def checkKeyLength(keyValidated):
+    if len(keyValidated) != KEY_LENGTH:
+        raise Exception("Wrong key length. Key must consist of " + KEY_LENGTH + " letters")
 
-    # Remove all spaces
-    textValidated = textValidated.replace(' ','')
+############################################
+def validatePlainText(textValidated):
+    # Remove all not alphabet symbols
+    reg = re.compile('[^a-zA-Z]')
+    textValidated = reg.sub('', textValidated)
     # Add padding Z if odd number
-    if lenText % 2 != 0:
-        textValidated = textValidated + paddingZ
+    if len(textValidated) % 2 != 0:
+        textValidated = textValidated + PADDING_Z
+    return textValidated
 
+############################################
+def fillEncNumbersArray(encNumbersArray, textValidated):
     i = 0
     for c in textValidated:
-        encText[i] = getNumber(c)
+        encNumbersArray[i] = getNumber(c)
         i += 1
-    print (encText)
+    return encNumbersArray
 
+############################################
+def encodeChunks(result, encNumbersArray, keyMatrix):
+    encMatrixChunk = [[0 for j in range(1)] for i in range(2)]
     i = 0
-    while i < lenText:
-        encMatrixWorker[0][0] = encText[i]
-        encMatrixWorker[1][0] = encText[i+1]
+    while i < len(encNumbersArray):
+        encMatrixChunk[0][0] = encNumbersArray[i]
+        encMatrixChunk[1][0] = encNumbersArray[i+1]
 
-        encChunk = multipyMatrix(encMatrixWorker, keyMatrix, keysAlphabetBase)
-        result.append(getChar(encChunk[0][0], keysAlphabetBase))
-        result.append(getChar(encChunk[1][0], keysAlphabetBase))
+        encChunk = multipyMatrix(encMatrixChunk, keyMatrix, KEY_BASE)
+        result.append(getChar(encChunk[0][0], KEY_BASE))
+        result.append(getChar(encChunk[1][0], KEY_BASE))
         i +=2
+    return result
 
+############################################
+def encrypt(text, key):
+    result = []
+    keyValidated = key.upper()
+    textValidated = text.upper()
+    keyMatrix = [[0 for j in range(2)] for i in range(2)]
+
+    checkKeyLength(keyValidated)
+    keyMatrix = fillKeyMatrix(keyMatrix, keyValidated)
+    textValidated = validatePlainText(textValidated)
+
+    encNumbersArray = [0 for e in range(len(textValidated))]
+    encNumbersArray = fillEncNumbersArray(encNumbersArray, textValidated)
+    result = encodeChunks(result, encNumbersArray, keyMatrix)
     return ''.join(result)

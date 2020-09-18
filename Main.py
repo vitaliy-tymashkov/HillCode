@@ -2,14 +2,13 @@ import unittest
 
 from Service import encrypt
 
-p = "Hi"
-k = "cats"
-
-p = 'This is a good day'
-k= 'bbaa'
+p = 'Five + Seven = Twelve'
+k= 'math'
 
 c = encrypt(p, k)
-print (c)
+print ("Original key = ", k)
+print ("Original plain text = ", p)
+print ("Encrypted text = ", c)
 
 
 
