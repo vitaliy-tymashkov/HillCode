@@ -50,6 +50,9 @@ def encrypt(text, key):
 
     print (keyMatrix)
 
+    # Remove all spaces
+    textValidated = textValidated.replace(' ','')
+    # Add padding Z if odd number
     if lenText % 2 != 0:
         textValidated = textValidated + paddingZ
 
